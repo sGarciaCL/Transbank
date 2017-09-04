@@ -37,12 +37,12 @@ function woocommerce_transbank_init()
 
             $this->id = 'transbank';
             $this->icon = "https://www.transbank.cl/public/img/Logo_Webpay3-01-50x50.png";
-            $this->method_title = __('Transbank – Pago a trav&eacute;s de Webpay Plus');
+            $this->method_title = __('Transbank â€“ Pago a trav&eacute;s de Webpay Plus');
             $this->notify_url = add_query_arg('wc-api', 'WC_Gateway_' . $this->id, home_url('/'));
             $this->integration = include( 'integration/integration.php' );
             
             /**
-             * Carga configuración y variables de inicio 
+             * Carga configuraciÃ³n y variables de inicio 
              **/
             $this->init_form_fields();
             $this->init_settings();
@@ -78,7 +78,7 @@ function woocommerce_transbank_init()
         }
 
         /**
-         * Comprueba configuración de moneda (Peso Chileno)
+         * Comprueba configuraciÃ³n de moneda (Peso Chileno)
          **/
         function is_valid_for_use()
         {
@@ -226,7 +226,7 @@ function woocommerce_transbank_init()
                 
                 WC()->session->set($order_info->order_key, "");
 
-                $error_message = "Estimado cliente, le informamos que su orden número ". $result->buyOrder . ", realizada el " . $date->format('d-m-Y H:i:s') . " termin&oacute; de forma inesperada ( " . $responseDescription . " ) ";
+                $error_message = "Estimado cliente, le informamos que su orden nÃºmero ". $result->buyOrder . ", realizada el " . $date->format('d-m-Y H:i:s') . " termin&oacute; de forma inesperada ( " . $responseDescription . " ) ";
                 wc_add_notice(__('ERROR: ', 'woothemes') . $error_message, 'error');
 
                 $redirectOrderReceived = $order_info->get_checkout_payment_url();
@@ -285,7 +285,7 @@ function woocommerce_transbank_init()
         }
 
         /**
-         * Opciones panel de administración
+         * Opciones panel de administraciÃ³n
          **/
         public function admin_options()
         {
@@ -339,7 +339,7 @@ function woocommerce_transbank_init()
     }
 
     /**
-     * Añadir Transbank Plus a Woocommerce
+     * AÃ±adir Transbank Plus a Woocommerce
      **/
     function woocommerce_add_transbank_gateway($methods) 
     {
@@ -431,6 +431,46 @@ function woocommerce_transbank_init()
             '</tr>' .
             '</tfoot>' .
             '</table><br/>';
+ 
+
+if($transactionResponse=="Aceptado"){
+         
+
+        // $conection = mysqli_connect("localhost","lapizlop_adminqa", "Sebas.123", "lapizlop_qa");
+
+            
+            $servername = "NOMBRE-SERVIDOR";
+            $username = "USUARIO-BASE-DE-DATOS";
+            $password = "CONTRASEÑA-BASE-DE-DATOS";
+            $dbname = "NOMBRE-BASE-DE-DATOS";
+
+            // Create connection
+            $conn = mysqli_connect($servername, $username, $password, $dbname);
+            //Check connection
+             if (!$conn) {
+                die("Connection failed: " . mysqli_connect_error());
+             }
+
+             $odenCompra=$_GET['$finalResponse->buyOrder'];  
+
+$CodigoAutorizacion=$finalResponse->detailOutput->authorizationCode;   
+            $fechaCompra=$date_accepted->format('Y-m-d');
+            $horaCompra=$date_accepted->format('H:i:s');
+            $numTarjeta=$finalResponse->cardDetail->cardNumber; 
+            $montoPAgo=$finalResponse->detailOutput->amount;
+            $cuotasNumero=$finalResponse->detailOutput->sharesNumber;
+
+            $sql = "INSERT IGNORE INTO `NOMBRE-BASE-DE-DATOS`.`TBK_Datos` (`ID_Pagos_Tbk`, `respuesta_Tbk`, `order_Tbk`, `autCode_Tbk`, `FechaComp_Tbk`, `HotaComp_Tbk`, `tarjeta_Tbk`, `tipoPago_Tbk`, `monto_Tbk`, `numCuota_Tbk`) VALUES (NULL, '$transactionResponse', '$finalResponse->buyOrder ', '$CodigoAutorizacion', '$fechaCompra', '$horaCompra', '$numTarjeta', '$paymenCodeResult', '$montoPAgo', '$cuotasNumero')";
+
+if (mysqli_query($conn, $sql)) {
+          echo "";
+            } else {
+              echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+            }
+
+            mysqli_close($conn);
+
+             }
         }
     }
 
@@ -443,3 +483,4 @@ if (strpos($_SERVER['REQUEST_URI'], "wc_gateway_transbank") && is_user_logged_in
         <script src="../wp-content/plugins/woocommerce-transbank/integration/js/integration.js"></script>          
     <?php
 }
+
